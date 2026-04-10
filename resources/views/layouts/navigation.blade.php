@@ -128,9 +128,6 @@
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden bg-prowise-navy border-t border-prowise-gray/10">
         <div class="pt-2 pb-3 space-y-1">
             @auth
-                <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-prowise-softblue hover:text-white hover:bg-prowise-blue/10">
-                    {{ __('Dashboard') }}
-                </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('chat')" :active="request()->routeIs('chat')" class="text-prowise-softblue hover:text-white hover:bg-prowise-blue/10">
                     {{ __('Chat IA') }}
                 </x-responsive-nav-link>

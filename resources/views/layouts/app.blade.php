@@ -66,7 +66,6 @@
                     <div>
                         <h4 class="text-white font-heading font-bold text-sm uppercase tracking-widest mb-6">{{ __('Plataforma') }}</h4>
                         <ul class="space-y-4">
-                            <li><a href="{{ route('dashboard') }}" class="text-prowise-softblue hover:text-prowise-blue text-sm transition-colors">{{ __('Dashboard') }}</a></li>
                             <li><a href="{{ route('chat') }}" class="text-prowise-softblue hover:text-prowise-blue text-sm transition-colors">{{ __('Chat IA') }}</a></li>
                             <li><a href="#solucao" class="text-prowise-softblue hover:text-prowise-blue text-sm transition-colors">{{ __('Como Funciona') }}</a></li>
                         </ul>
