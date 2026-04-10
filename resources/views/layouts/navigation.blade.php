@@ -32,7 +32,7 @@
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <!-- Language Switcher -->
-                <div class="me-6">
+                <div class="me-10">
                     @php
                         $locales = [
                             'en' => 'English', 'pt' => 'Português', 'fr' => 'Français', 'zh' => 'Mandarin',
@@ -47,12 +47,12 @@
 
                     <x-dropdown align="right" width="48" contentClasses="py-1 bg-prowise-navy border border-prowise-gray/20 shadow-2xl max-h-96 overflow-y-auto custom-scrollbar">
                         <x-slot name="trigger">
-                            <button class="inline-flex items-center px-4 py-2 border border-prowise-gray/20 text-xs font-bold rounded-full text-prowise-softblue bg-white/5 hover:text-white hover:bg-white/10 transition-all uppercase gap-2">
-                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <button class="inline-flex items-center px-5 py-2.5 border border-prowise-gray/20 text-xs font-bold rounded-full text-prowise-softblue bg-white/5 hover:text-white hover:bg-white/10 transition-all uppercase gap-3 group">
+                                <svg class="w-4.5 h-4.5 text-prowise-blue group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
                                 </svg>
                                 <span>{{ $currentLocale }}</span>
-                                <svg class="h-3 w-3 fill-current opacity-60" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <svg class="h-3 w-3 fill-current opacity-40" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                                 </svg>
                             </button>
