@@ -31,6 +31,42 @@
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
+                <!-- Language Switcher -->
+                <div class="me-4">
+                    @php
+                        $locales = [
+                            'en' => 'English', 'pt' => 'Português', 'fr' => 'Français', 'zh' => 'Mandarin',
+                            'hi' => 'Hindi', 'es' => 'Español', 'ar' => 'العربية', 'bn' => 'Bengali',
+                            'ru' => 'Русский', 'ur' => 'Urdu', 'id' => 'Indonesian', 'de' => 'Deutsch',
+                            'ja' => '日本語', 'pcm' => 'Nigerian Pidgin', 'mr' => 'Marathi', 'te' => 'Telugu',
+                            'tr' => 'Türkçe', 'ta' => 'Tamil', 'yue' => 'Cantonese', 'vi' => 'Tiếng Việt',
+                            'tl' => 'Tagalog', 'wuu' => 'Wu Chinese', 'ko' => '한국어'
+                        ];
+                        $currentLocale = App::getLocale();
+                    @endphp
+
+                    <x-dropdown align="right" width="48" contentClasses="py-1 bg-prowise-navy border border-prowise-gray/20 shadow-2xl max-h-96 overflow-y-auto custom-scrollbar">
+                        <x-slot name="trigger">
+                            <button class="inline-flex items-center px-3 py-1.5 border border-prowise-gray/20 text-xs font-bold rounded-full text-prowise-softblue bg-white/5 hover:text-white hover:bg-white/10 transition-all uppercase">
+                                <span>{{ $currentLocale }}</span>
+                                <svg class="ms-1 h-3 w-3 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </x-slot>
+
+                        <x-slot name="content">
+                            @foreach($locales as $code => $name)
+                                <x-dropdown-link :href="route('locale.switch', $code)" 
+                                    class="text-xs {{ $currentLocale == $code ? 'text-prowise-blue bg-white/5 font-bold' : 'text-prowise-softblue hover:text-white hover:bg-white/10' }} flex justify-between items-center px-4 py-2 transition-colors">
+                                    <span>{{ $name }}</span>
+                                    <span class="text-[10px] opacity-50 uppercase">{{ $code }}</span>
+                                </x-dropdown-link>
+                            @endforeach
+                        </x-slot>
+                    </x-dropdown>
+                </div>
+
                 @auth
                     <x-dropdown align="right" width="48">
                         <x-slot name="trigger">
@@ -131,11 +167,11 @@
             @else
                 <div class="space-y-1">
                     <x-responsive-nav-link :href="route('login')" class="text-prowise-softblue hover:text-white hover:bg-prowise-blue/10">
-                        {{ __('Entrar') }}
+                        {{ __('Log In') }}
                     </x-responsive-nav-link>
                     @if (Route::has('register'))
                         <x-responsive-nav-link :href="route('register')" class="text-prowise-softblue hover:text-white hover:bg-prowise-blue/10">
-                            {{ __('Começar') }}
+                            {{ __('Get Started') }}
                         </x-responsive-nav-link>
                     @endif
                 </div>

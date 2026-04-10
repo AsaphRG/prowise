@@ -22,4 +22,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('lang/{locale}', function ($locale) {
+    $supportedLocales = [
+        'en', 'pt', 'fr', 'zh', 'hi', 'es', 'ar', 'bn', 'ru', 'ur', 'id', 'de', 
+        'ja', 'pcm', 'mr', 'te', 'tr', 'ta', 'yue', 'vi', 'tl', 'wuu', 'ko'
+    ];
+    if (in_array($locale, $supportedLocales)) {
+        session(['locale' => $locale]);
+    }
+    return redirect()->back();
+})->name('locale.switch');
+
 require __DIR__.'/auth.php';
