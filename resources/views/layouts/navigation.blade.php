@@ -32,7 +32,7 @@
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
                 <!-- Language Switcher -->
-                <div class="me-4">
+                <div class="me-6">
                     @php
                         $locales = [
                             'en' => 'English', 'pt' => 'Português', 'fr' => 'Français', 'zh' => 'Mandarin',
@@ -47,9 +47,12 @@
 
                     <x-dropdown align="right" width="48" contentClasses="py-1 bg-prowise-navy border border-prowise-gray/20 shadow-2xl max-h-96 overflow-y-auto custom-scrollbar">
                         <x-slot name="trigger">
-                            <button class="inline-flex items-center px-3 py-1.5 border border-prowise-gray/20 text-xs font-bold rounded-full text-prowise-softblue bg-white/5 hover:text-white hover:bg-white/10 transition-all uppercase">
+                            <button class="inline-flex items-center px-4 py-2 border border-prowise-gray/20 text-xs font-bold rounded-full text-prowise-softblue bg-white/5 hover:text-white hover:bg-white/10 transition-all uppercase gap-2">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path>
+                                </svg>
                                 <span>{{ $currentLocale }}</span>
-                                <svg class="ms-1 h-3 w-3 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <svg class="h-3 w-3 fill-current opacity-60" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                                 </svg>
                             </button>
@@ -141,6 +144,52 @@
 
         <!-- Responsive Settings Options -->
         <div class="pt-4 pb-1 border-t border-prowise-gray/10">
+            <!-- Language Switcher Mobile -->
+            <div class="px-4 mb-4">
+                <div class="text-xs font-bold text-prowise-softblue uppercase tracking-widest mb-3 opacity-50">{{ __('Language') }}</div>
+                <div class="flex flex-wrap gap-2">
+                    @php
+                        $locales = [
+                            'pt' => 'PT', 'en' => 'EN', 'es' => 'ES', 'fr' => 'FR', 'de' => 'DE'
+                        ];
+                        $currentLocale = App::getLocale();
+                    @endphp
+                    @foreach($locales as $code => $label)
+                        <a href="{{ route('locale.switch', $code) }}" 
+                           class="px-3 py-1.5 rounded-full border {{ $currentLocale == $code ? 'bg-prowise-blue border-prowise-blue text-white font-bold' : 'border-prowise-gray/20 text-prowise-softblue hover:text-white hover:bg-white/5' }} text-xs transition-all">
+                            {{ $label }}
+                        </a>
+                    @endforeach
+                    <x-dropdown align="left" width="48" contentClasses="py-1 bg-prowise-navy border border-prowise-gray/20 shadow-2xl max-h-64 overflow-y-auto custom-scrollbar">
+                        <x-slot name="trigger">
+                            <button class="px-3 py-1.5 rounded-full border border-prowise-gray/20 text-prowise-softblue hover:text-white hover:bg-white/5 text-xs transition-all flex items-center gap-1">
+                                <span>+</span>
+                                <svg class="h-3 w-3 fill-current opacity-60" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </x-slot>
+                        <x-slot name="content">
+                            @php
+                                $allLocales = [
+                                    'en' => 'English', 'pt' => 'Português', 'fr' => 'Français', 'zh' => 'Mandarin',
+                                    'hi' => 'Hindi', 'es' => 'Español', 'ar' => 'العربية', 'bn' => 'Bengali',
+                                    'ru' => 'Русский', 'ur' => 'Urdu', 'id' => 'Indonesian', 'de' => 'Deutsch',
+                                    'ja' => '日本語', 'pcm' => 'Nigerian Pidgin', 'mr' => 'Marathi', 'te' => 'Telugu',
+                                    'tr' => 'Türkçe', 'ta' => 'Tamil', 'yue' => 'Cantonese', 'vi' => 'Tiếng Việt',
+                                    'tl' => 'Tagalog', 'wuu' => 'Wu Chinese', 'ko' => '한국어'
+                                ];
+                            @endphp
+                            @foreach($allLocales as $code => $name)
+                                <x-dropdown-link :href="route('locale.switch', $code)" class="text-xs text-prowise-softblue hover:text-white">
+                                    {{ $name }}
+                                </x-dropdown-link>
+                            @endforeach
+                        </x-slot>
+                    </x-dropdown>
+                </div>
+            </div>
+
             @auth
                 <div class="px-4">
                     <div class="font-medium text-base text-white">{{ Auth::user()->name }}</div>
