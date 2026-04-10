@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Prowise | Assistente de IA')
+@section('title', __('Prowise | Assistente de IA'))
 
 @section('content')
 <div class="flex flex-col h-[calc(100vh-80px)] overflow-hidden">
@@ -11,10 +11,10 @@
                 <svg class="w-6 h-6 text-prowise-blue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
             </div>
             <div>
-                <h2 class="font-heading font-semibold text-lg text-white">Assistente Prowise</h2>
+                <h2 class="font-heading font-semibold text-lg text-white">{{ __('Assistente Prowise') }}</h2>
                 <p class="text-xs text-prowise-green flex items-center gap-1">
                     <span class="w-2 h-2 rounded-full bg-prowise-green animate-pulse"></span>
-                    Online • Vertex AI Ready
+                    {{ __('Online • Vertex AI Ready') }}
                 </p>
             </div>
         </div>

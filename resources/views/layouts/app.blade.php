@@ -76,7 +76,7 @@
                     <div>
                         <h4 class="text-white font-heading font-bold text-sm uppercase tracking-widest mb-6">{{ __('Empresa') }}</h4>
                         <ul class="space-y-4">
-                            <li><a href="{{ route('agendar-demonstracao') }}" class="text-prowise-softblue hover:text-prowise-blue text-sm transition-colors">{{ __('Agendar Demo') }}</a></li>
+                            <li><a href="{{ route('agendar-demonstracao') }}" class="text-prowise-softblue hover:text-prowise-blue text-sm transition-colors">{{ __('Agendar Demonstração') }}</a></li>
                             <li><a href="#" class="text-prowise-softblue hover:text-prowise-blue text-sm transition-colors">{{ __('Sobre Nós') }}</a></li>
                             <li><a href="#" class="text-prowise-softblue hover:text-prowise-blue text-sm transition-colors">{{ __('Blog') }}</a></li>
                         </ul>

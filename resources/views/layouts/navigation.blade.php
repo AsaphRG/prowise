@@ -104,9 +104,9 @@
                     </x-dropdown>
                 @else
                     <div class="flex items-center gap-4">
-                        <a href="{{ route('login') }}" class="text-prowise-softblue hover:text-white text-sm font-medium transition-colors">Entrar</a>
+                        <a href="{{ route('login') }}" class="text-prowise-softblue hover:text-white text-sm font-medium transition-colors">{{ __('Log In') }}</a>
                         @if (Route::has('register'))
-                            <a href="{{ route('register') }}" class="bg-prowise-blue hover:bg-prowise-blue/90 text-white px-6 py-2.5 rounded-full text-sm font-medium transition-all shadow-md">Começar</a>
+                            <a href="{{ route('register') }}" class="bg-prowise-blue hover:bg-prowise-blue/90 text-white px-6 py-2.5 rounded-full text-sm font-medium transition-all shadow-md">{{ __('Get Started') }}</a>
                         @endif
                     </div>
                 @endauth

@@ -1,5 +1,5 @@
 <x-app-layout>
-    @section('title', 'Prowise | Dashboard')
+    @section('title', __('Prowise | Dashboard'))
 
     <x-slot name="header">
         <h2 class="font-heading font-semibold text-2xl text-white leading-tight">
@@ -16,8 +16,8 @@
                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         </div>
                         <div>
-                            <h3 class="text-xl font-heading font-bold">Olá, {{ Auth::user()->name }}!</h3>
-                            <p class="text-prowise-softblue text-sm">Bem-vindo à sua central de operações.</p>
+                            <h3 class="text-xl font-heading font-bold">{{ __('Olá, :name!', ['name' => Auth::user()->name]) }}</h3>
+                            <p class="text-prowise-softblue text-sm">{{ __('Bem-vindo à sua central de operações.') }}</p>
                         </div>
                     </div>
 
@@ -30,8 +30,8 @@
                                 </div>
                                 <svg class="w-5 h-5 text-prowise-gray/30 group-hover:text-prowise-blue transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                             </div>
-                            <h4 class="font-heading font-bold text-lg mb-1">Assistente de IA</h4>
-                            <p class="text-sm text-prowise-softblue leading-relaxed">Inicie uma conversa com nossa inteligência para organizar sua comunicação.</p>
+                            <h4 class="font-heading font-bold text-lg mb-1">{{ __('Assistente de IA') }}</h4>
+                            <p class="text-sm text-prowise-softblue leading-relaxed">{{ __('Inicie uma conversa com nossa inteligência para organizar sua comunicação.') }}</p>
                         </a>
 
                         <!-- Profile Card -->
@@ -42,8 +42,8 @@
                                 </div>
                                 <svg class="w-5 h-5 text-prowise-gray/30 group-hover:text-prowise-green transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
                             </div>
-                            <h4 class="font-heading font-bold text-lg mb-1">Configurações</h4>
-                            <p class="text-sm text-prowise-softblue leading-relaxed">Gerencie suas informações de conta e preferências de segurança.</p>
+                            <h4 class="font-heading font-bold text-lg mb-1">{{ __('Configurações') }}</h4>
+                            <p class="text-sm text-prowise-softblue leading-relaxed">{{ __('Gerencie suas informações de conta e preferências de segurança.') }}</p>
                         </a>
                     </div>
                 </div>

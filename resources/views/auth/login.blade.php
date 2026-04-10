@@ -50,9 +50,9 @@
 
         @if (Route::has('register'))
             <p class="mt-8 text-center text-sm text-prowise-softblue">
-                Não tem uma conta?
+                {{ __('Não tem uma conta?') }}
                 <a href="{{ route('register') }}" class="text-prowise-blue font-semibold hover:text-white transition-colors">
-                    Cadastre-se agora
+                    {{ __('Cadastre-se agora') }}
                 </a>
             </p>
         @endif
