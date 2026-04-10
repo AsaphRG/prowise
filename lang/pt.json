@@ -1,7 +1,7 @@
 {
     "Dashboard": "Dashboard",
     "Chat IA": "Chat IA",
-    "Agendar Demo": "Agendar Demo",
+    "Agendar Demo": "Agendar Demonstração",
     "Profile": "Perfil",
     "Log Out": "Sair",
     "Log In": "Entrar",
@@ -41,10 +41,12 @@
     "Todo dia.": "Todo dia.",
     "Somos uma solução de IA operacional criada para organizar a comunicação interna das PMEs. Conecte informações espalhadas, reduza o retrabalho e leve sua empresa a outro nível.": "Somos uma solução de IA operacional criada para organizar a comunicação interna das PMEs. Conecte informações espalhadas, reduza o retrabalho e leve sua empresa a outro nível.",
     "Ir para o Chat IA": "Ir para o Chat IA",
-    "Agende uma demonstração": "Agende uma demonstração",
+    "Agende uma demonstração": "Agendar Demonstração",
     "Entenda o fluxo": "Entenda o fluxo",
     "Agilidade que move resultados": "Agilidade que move resultados",
     "Eliminamos atritos, aceleramos fluxos e garantimos que tudo circule no ritmo que sua empresa precisa para sobreviver e crescer.": "Eliminamos atritos, aceleramos fluxos e garantimos que tudo circule no ritmo que sua empresa precisa para sobreviver e crescer.",
     "Clareza que conecta": "Clareza que conecta",
-    "Transformamos caos em ordem, ruídos em alinhamento e demandas dispersas em fluidez. A clareza é o núcleo da confiança interna.": "Transformamos caos em ordem, ruídos em alinhamento e demandas dispersas em fluidez. A clareza é o núcleo da confiança interna."
+    "Transformamos caos em ordem, ruídos em alinhamento e demandas dispersas em fluidez. A clareza é o núcleo da confiança interna.": "Transformamos caos em ordem, ruídos em alinhamento e demandas dispersas em fluidez. A clareza é o núcleo da confiança interna.",
+    "Confiabilidade dia a dia": "Confiabilidade dia a dia",
+    "Comprometidos em ser uma base estável, entregamos previsibilidade e segurança. Nada se perde, tudo chega onde precisa chegar.": "Comprometidos em ser uma base estável, entregamos previsibilidade e segurança. Nada se perde, tudo chega onde precisa chegar."
 }
