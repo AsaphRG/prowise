@@ -14,9 +14,6 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     @auth
-                        <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="text-prowise-softblue hover:text-white border-transparent hover:border-prowise-blue">
-                            {{ __('Dashboard') }}
-                        </x-nav-link>
                         <x-nav-link :href="route('chat')" :active="request()->routeIs('chat')" class="text-prowise-softblue hover:text-white border-transparent hover:border-prowise-blue">
                             {{ __('Chat IA') }}
                         </x-nav-link>

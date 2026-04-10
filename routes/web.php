@@ -10,7 +10,7 @@ Route::get('/', function () {
 Route::view('/agendar-demonstracao', 'agendar-demonstracao')->name('agendar-demonstracao');
 
 Route::get('/dashboard', function () {
-    return view('dashboard');
+    return redirect()->route('chat');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
