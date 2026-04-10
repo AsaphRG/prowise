@@ -35,8 +35,8 @@
                     <svg class="w-8 h-8 text-prowise-softblue" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
                 </div>
                 <div>
-                    <h3 class="font-medium text-white">Como posso ajudar hoje?</h3>
-                    <p class="text-xs text-prowise-softblue">Inicie uma conversa para alinhar sua operação.</p>
+                    <h3 class="font-medium text-white">{{ __('Como posso ajudar hoje?') }}</h3>
+                    <p class="text-xs text-prowise-softblue">{{ __('Inicie uma conversa para alinhar sua operação.') }}</p>
                 </div>
             </div>
         @endforelse
@@ -58,7 +58,7 @@
         <form id="chat-form" class="max-w-4xl mx-auto flex items-end gap-3 bg-white/5 border border-prowise-gray/20 rounded-2xl p-2 focus-within:border-prowise-blue transition-colors">
             @csrf
             <input type="hidden" name="conversation_id" value="{{ $conversation->id }}">
-            <textarea id="message-input" name="message" rows="1" class="flex-grow bg-transparent border-none focus:ring-0 text-white placeholder-prowise-gray/50 py-3 px-4 resize-none overflow-hidden" placeholder="Escreva sua mensagem aqui..." required></textarea>
+            <textarea id="message-input" name="message" rows="1" class="flex-grow bg-transparent border-none focus:ring-0 text-white placeholder-prowise-gray/50 py-3 px-4 resize-none overflow-hidden" placeholder="{{ __('Escreva sua mensagem aqui...') }}" required></textarea>
             <button type="submit" class="bg-prowise-blue hover:bg-prowise-blue/90 text-white p-3 rounded-xl transition-all shadow-lg shrink-0">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
             </button>
@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
-            if (!response.ok) throw new Error('Falha ao enviar mensagem');
+            if (!response.ok) throw new Error("{{ __('Falha ao enviar mensagem') }}");
 
             const data = await response.json();
             
@@ -153,7 +153,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error:', error);
             typingIndicator.classList.add('hidden');
-            alert('Erro ao processar mensagem. Tente novamente.');
+            alert("{{ __('Erro ao processar mensagem. Tente novamente.') }}");
         }
     });
 
