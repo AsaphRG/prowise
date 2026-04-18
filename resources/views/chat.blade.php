@@ -25,7 +25,26 @@
         @forelse($messages as $message)
             <div class="flex {{ $message->role === 'user' ? 'justify-end' : 'justify-start' }}">
                 <div class="max-w-[80%] md:max-w-[70%] rounded-2xl p-4 {{ $message->role === 'user' ? 'bg-prowise-blue text-white rounded-tr-none' : 'bg-white/5 border border-prowise-gray/20 text-prowise-softblue rounded-tl-none' }}">
-                    <p class="text-sm leading-relaxed whitespace-pre-wrap">{{ $message->content }}</p>
+                    <div class="message-content text-sm leading-relaxed prose prose-invert max-w-none prose-p:my-0 prose-sm" data-raw="{{ $message->content }}">
+                        @if($message->role === 'user')
+                            {{ $message->content }}
+                        @else
+                            {{-- Content will be rendered by marked.js on load --}}
+                            <p class="animate-pulse">...</p>
+                        @endif
+                    </div>
+                    
+                    @if($message->role === 'assistant' && isset($message->metadata['citations']))
+                        <div class="mt-3 pt-3 border-t border-prowise-gray/10 text-[10px]">
+                            <p class="font-semibold text-prowise-softblue mb-1 uppercase tracking-wider">{{ __('Fontes:') }}</p>
+                            <ul class="space-y-1">
+                                @foreach($message->metadata['citations'] as $citation)
+                                    <li><a href="{{ $citation['url'] ?? '#' }}" target="_blank" class="text-prowise-blue hover:underline opacity-80">{{ $citation['title'] ?? $citation['source'] ?? 'Referência' }}</a></li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
                     <span class="text-[10px] mt-2 block opacity-50">{{ $message->created_at->format('H:i') }}</span>
                 </div>
             </div>
@@ -83,6 +102,7 @@
 </style>
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const chatForm = document.getElementById('chat-form');
@@ -90,6 +110,20 @@ document.addEventListener('DOMContentLoaded', function() {
     const chatMessages = document.getElementById('chat-messages');
     const typingIndicator = document.getElementById('typing-indicator');
     const emptyState = document.getElementById('empty-state');
+
+    // Configure marked
+    marked.setOptions({
+        breaks: true,
+        gfm: true
+    });
+
+    // Initialize existing messages with markdown
+    document.querySelectorAll('.message-content').forEach(el => {
+        const raw = el.getAttribute('data-raw');
+        if (raw) {
+            el.innerHTML = marked.parse(raw);
+        }
+    });
 
     // Auto-resize textarea
     messageInput.addEventListener('input', function() {
@@ -138,6 +172,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 body: formData,
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
                 }
             });
 
@@ -147,7 +182,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // 5. Hide typing & add AI response
             typingIndicator.classList.add('hidden');
-            addMessageToUI('assistant', data.ai_message.content);
+            addMessageToUI('assistant', data.ai_message.content, data.citations);
             scrollToBottom();
 
         } catch (error) {
@@ -157,16 +192,33 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    function addMessageToUI(role, content) {
+    function addMessageToUI(role, content, citations = []) {
         const div = document.createElement('div');
         div.className = `flex ${role === 'user' ? 'justify-end' : 'justify-start'}`;
         
         const now = new Date();
         const time = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
 
+        let citationsHtml = '';
+        if (citations && citations.length > 0) {
+            citationsHtml = `
+                <div class="mt-3 pt-3 border-t border-prowise-gray/10 text-[10px]">
+                    <p class="font-semibold text-prowise-softblue mb-1 uppercase tracking-wider">{{ __('Fontes:') }}</p>
+                    <ul class="space-y-1">
+                        ${citations.map(c => `
+                            <li><a href="${c.url || '#'}" target="_blank" class="text-prowise-blue hover:underline opacity-80">${c.title || c.source || 'Referência'}</a></li>
+                        `).join('')}
+                    </ul>
+                </div>
+            `;
+        }
+
+        const parsedContent = role === 'assistant' ? marked.parse(content) : content;
+
         div.innerHTML = `
             <div class="max-w-[80%] md:max-w-[70%] rounded-2xl p-4 ${role === 'user' ? 'bg-prowise-blue text-white rounded-tr-none' : 'bg-white/5 border border-prowise-gray/20 text-prowise-softblue rounded-tl-none'}">
-                <p class="text-sm leading-relaxed whitespace-pre-wrap">${content}</p>
+                <div class="message-content text-sm leading-relaxed prose prose-invert max-w-none prose-p:my-0 prose-sm">${parsedContent}</div>
+                ${citationsHtml}
                 <span class="text-[10px] mt-2 block opacity-50">${time}</span>
             </div>
         `;

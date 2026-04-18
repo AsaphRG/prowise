@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'vertex_ai' => [
+        'project_id' => env('GOOGLE_CLOUD_PROJECT'),
+        'location' => env('GOOGLE_CLOUD_LOCATION', 'us-central1'),
+        'resource_id' => env('VERTEX_AGENT_RESOURCE_ID'),
+        'credentials' => env('GOOGLE_APPLICATION_CREDENTIALS'),
+    ],
+
 ];

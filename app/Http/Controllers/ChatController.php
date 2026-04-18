@@ -2,13 +2,22 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Services\VertexAIService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class ChatController extends Controller
 {
+    protected $vertexAI;
+
+    public function __construct(VertexAIService $vertexAI)
+    {
+        $this->vertexAI = $vertexAI;
+    }
+
     /**
      * Display the chat interface.
      */
@@ -25,7 +34,7 @@ class ChatController extends Controller
     }
 
     /**
-     * Store a new message and generate a placeholder AI response.
+     * Store a new message and generate an AI response from Vertex AI.
      */
     public function store(Request $request)
     {
@@ -47,20 +56,38 @@ class ChatController extends Controller
             'content' => $request->message,
         ]);
 
-        // 2. Placeholder AI Response (Integration with Vertex AI will go here)
-        // Simulate a delay
-        // usleep(500000); 
+        // 2. Prepare history for context (last 5 messages for example)
+        $history = $conversation->messages()
+            ->where('id', '!=', $userMessage->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->reverse()
+            ->values() // Importante: reseta as chaves para 0, 1, 2...
+            ->map(function ($msg) {
+                return [
+                    'role' => $msg->role === 'user' ? 'human' : 'ai',
+                    'content' => $msg->content,
+                ];
+            })
+            ->toArray();
 
-        $aiContent = "Olá! Eu sou o assistente da Prowise. Recebi sua mensagem: \"" . $request->message . "\". Em breve estarei integrado com o Google Vertex AI para te ajudar de forma ainda mais inteligente.";
+        // 3. Query Vertex AI Reasoning Engine
+        $aiResponse = $this->vertexAI->query($request->message, $history);
+        $aiContent = $aiResponse['content'];
+        $citations = $aiResponse['citations'];
 
+        // 4. Save AI Response
         $aiMessage = $conversation->messages()->create([
             'role' => 'assistant',
             'content' => $aiContent,
+            'metadata' => !empty($citations) ? ['citations' => $citations] : null,
         ]);
 
         return response()->json([
             'user_message' => $userMessage,
             'ai_message' => $aiMessage,
+            'citations' => $citations,
         ]);
     }
 }
