@@ -72,8 +72,13 @@ class ChatController extends Controller
             })
             ->toArray();
 
+        if (!$conversation->vertex_session_id) {
+            $conversation->vertex_session_id = $this->vertexAI->createSession(Auth::id());
+            $conversation->save();
+        }
+
         // 3. Query Vertex AI Reasoning Engine
-        $aiResponse = $this->vertexAI->query($request->message, $history);
+        $aiResponse = $this->vertexAI->query($request->message, $conversation->vertex_session_id, $history);
         $aiContent = $aiResponse['content'];
         $citations = $aiResponse['citations'];
 

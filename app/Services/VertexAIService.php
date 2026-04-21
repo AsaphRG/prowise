@@ -43,19 +43,58 @@ class VertexAIService
     }
 
     /**
+     * Create a new session in the Reasoning Engine
+     */
+    public function createSession(string $userId)
+    {
+        try {
+            $token = $this->getAccessToken();
+            $endpoint = "https://{$this->location}-aiplatform.googleapis.com/v1/projects/{$this->projectId}/locations/{$this->location}/reasoningEngines/{$this->resourceId}:create_session";
+
+            $payload = [
+                'input' => [
+                    'user_id' => (string) $userId,
+                ],
+            ];
+
+            $response = Http::withToken($token)
+                ->withHeaders(['Content-Type' => 'application/json'])
+                ->post($endpoint, $payload);
+
+            if ($response->failed()) {
+                Log::error('Vertex AI Create Session Failed', [
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
+                return null;
+            }
+
+            $result = $response->json();
+            // O Reasoning Engine retorna os dados da sessão em 'output'
+            return $result['output']['id'] ?? null;
+
+        } catch (\Exception $e) {
+            Log::error('Vertex AIService CreateSession Error: ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Query the Reasoning Engine (RAG Agent)
      */
-    public function query(string $query, array $history = [])
+    public function query(string $query, ?string $sessionId = null, array $history = [])
     {
         try {
             $token = $this->getAccessToken();
             $endpoint = "https://{$this->location}-aiplatform.googleapis.com/v1/projects/{$this->projectId}/locations/{$this->location}/reasoningEngines/{$this->resourceId}:query";
 
-            // O AgentWrapper no Python espera 'message'
             $payload = [
-                'message' => $query,
-                'user_id' => 'laravel_user',
-                'session_id' => 'laravel_session'
+                'class_method' => 'query',
+                'input' => [
+                    'message' => $query,
+                    'user_id' => 'laravel_user',
+                    'session_id' => $sessionId ?? 'laravel_session'
+                ],
             ];
 
             $response = Http::withToken($token)
@@ -79,6 +118,12 @@ class VertexAIService
 
             $result = $response->json();
 
+            // Log de sucesso para depuração
+            Log::info('Vertex AI Response Success', [
+                'status' => $response->status(),
+                'result' => $result
+            ]);
+
             // Resposta do Reasoning Engine via ADK geralmente vem em 'output'
             $content = '';
             $citations = [];
@@ -87,7 +132,7 @@ class VertexAIService
                 // Se a saída for uma string direta
                 if (is_string($result['output'])) {
                     $content = $result['output'];
-                } 
+                }
                 // Se for um array (ex: se o agente retornar JSON estruturado)
                 elseif (is_array($result['output'])) {
                     $content = $result['output']['content'] ?? $result['output']['answer'] ?? json_encode($result['output']);
