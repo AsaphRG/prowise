@@ -56,29 +56,16 @@ class ChatController extends Controller
             'content' => $request->message,
         ]);
 
-        // 2. Prepare history for context (last 5 messages for example)
-        $history = $conversation->messages()
-            ->where('id', '!=', $userMessage->id)
-            ->orderBy('created_at', 'desc')
-            ->limit(10)
-            ->get()
-            ->reverse()
-            ->values() // Importante: reseta as chaves para 0, 1, 2...
-            ->map(function ($msg) {
-                return [
-                    'role' => $msg->role === 'user' ? 'human' : 'ai',
-                    'content' => $msg->content,
-                ];
-            })
-            ->toArray();
-
+        // 2. Ensure the ADK session exists. The Reasoning Engine (AdkApp)
+        //    persists conversation state per session, so we don't need to
+        //    rebuild history on the client side.
         if (!$conversation->vertex_session_id) {
             $conversation->vertex_session_id = $this->vertexAI->createSession(Auth::id());
             $conversation->save();
         }
 
         // 3. Query Vertex AI Reasoning Engine
-        $aiResponse = $this->vertexAI->query($request->message, $conversation->vertex_session_id, $history);
+        $aiResponse = $this->vertexAI->query($request->message, $conversation->vertex_session_id);
         $aiContent = $aiResponse['content'];
         $citations = $aiResponse['citations'];
 
