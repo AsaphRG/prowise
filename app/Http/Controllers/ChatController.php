@@ -40,21 +40,21 @@ class ChatController extends Controller
     {
         try {
             $request->validate([
-                \'message\' => \'required|string\',
-                \'conversation_id\' => \'required|exists:conversations,id\',
+                'message' => 'required|string',
+                'conversation_id' => 'required|exists:conversations,id',
             ]);
 
             $conversation = Conversation::findOrFail($request->conversation_id);
 
             // Ensure user owns the conversation
             if ($conversation->user_id !== Auth::id()) {
-                return response()->json([\'error\' => \'Não autorizado\'], 403);
+                return response()->json(['error' => 'Não autorizado'], 403);
             }
 
             // 1. Save User Message
             $userMessage = $conversation->messages()->create([
-                \'role\' => \'user\',
-                \'content\' => $request->message,
+                'role' => 'user',
+                'content' => $request->message,
             ]);
 
             // 2. Ensure the ADK session exists
@@ -65,30 +65,30 @@ class ChatController extends Controller
 
             // 3. Query Vertex AI Reasoning Engine
             $aiResponse = $this->vertexAI->query($request->message, $conversation->vertex_session_id);
-            $aiContent = $aiResponse[\'content\'];
-            $citations = $aiResponse[\'citations\'];
+            $aiContent = $aiResponse['content'];
+            $citations = $aiResponse['citations'];
 
             // 4. Save AI Response
             $aiMessage = $conversation->messages()->create([
-                \'role\' => \'assistant\',
-                \'content\' => $aiContent,
-                \'metadata\' => !empty($citations) ? [\'citations\' => $citations] : null,
+                'role' => 'assistant',
+                'content' => $aiContent,
+                'metadata' => !empty($citations) ? ['citations' => $citations] : null,
             ]);
 
             return response()->json([
-                \'user_message\' => $userMessage,
-                \'ai_message\' => $aiMessage,
-                \'citations\' => $citations,
+                'user_message' => $userMessage,
+                'ai_message' => $aiMessage,
+                'citations' => $citations,
             ]);
 
         } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error(\'ChatController Store Error: \' . $e->getMessage(), [
-                \'trace\' => substr($e->getTraceAsString(), 0, 500)
+            \Illuminate\Support\Facades\Log::error('ChatController Store Error: ' . $e->getMessage(), [
+                'trace' => substr($e->getTraceAsString(), 0, 500)
             ]);
             
             return response()->json([
-                \'error\' => \'Erro ao processar mensagem\',
-                \'message\' => $e->getMessage()
+                'error' => 'Erro ao processar mensagem',
+                'message' => $e->getMessage()
             ], 500);
         }
     }
