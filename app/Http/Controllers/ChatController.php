@@ -38,48 +38,58 @@ class ChatController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'message' => 'required|string',
-            'conversation_id' => 'required|exists:conversations,id',
-        ]);
+        try {
+            $request->validate([
+                \'message\' => \'required|string\',
+                \'conversation_id\' => \'required|exists:conversations,id\',
+            ]);
 
-        $conversation = Conversation::findOrFail($request->conversation_id);
+            $conversation = Conversation::findOrFail($request->conversation_id);
 
-        // Ensure user owns the conversation
-        if ($conversation->user_id !== Auth::id()) {
-            abort(403);
+            // Ensure user owns the conversation
+            if ($conversation->user_id !== Auth::id()) {
+                return response()->json([\'error\' => \'Não autorizado\'], 403);
+            }
+
+            // 1. Save User Message
+            $userMessage = $conversation->messages()->create([
+                \'role\' => \'user\',
+                \'content\' => $request->message,
+            ]);
+
+            // 2. Ensure the ADK session exists
+            if (!$conversation->vertex_session_id) {
+                $conversation->vertex_session_id = $this->vertexAI->createSession(Auth::id());
+                $conversation->save();
+            }
+
+            // 3. Query Vertex AI Reasoning Engine
+            $aiResponse = $this->vertexAI->query($request->message, $conversation->vertex_session_id);
+            $aiContent = $aiResponse[\'content\'];
+            $citations = $aiResponse[\'citations\'];
+
+            // 4. Save AI Response
+            $aiMessage = $conversation->messages()->create([
+                \'role\' => \'assistant\',
+                \'content\' => $aiContent,
+                \'metadata\' => !empty($citations) ? [\'citations\' => $citations] : null,
+            ]);
+
+            return response()->json([
+                \'user_message\' => $userMessage,
+                \'ai_message\' => $aiMessage,
+                \'citations\' => $citations,
+            ]);
+
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error(\'ChatController Store Error: \' . $e->getMessage(), [
+                \'trace\' => substr($e->getTraceAsString(), 0, 500)
+            ]);
+            
+            return response()->json([
+                \'error\' => \'Erro ao processar mensagem\',
+                \'message\' => $e->getMessage()
+            ], 500);
         }
-
-        // 1. Save User Message
-        $userMessage = $conversation->messages()->create([
-            'role' => 'user',
-            'content' => $request->message,
-        ]);
-
-        // 2. Ensure the ADK session exists. The Reasoning Engine (AdkApp)
-        //    persists conversation state per session, so we don't need to
-        //    rebuild history on the client side.
-        if (!$conversation->vertex_session_id) {
-            $conversation->vertex_session_id = $this->vertexAI->createSession(Auth::id());
-            $conversation->save();
-        }
-
-        // 3. Query Vertex AI Reasoning Engine
-        $aiResponse = $this->vertexAI->query($request->message, $conversation->vertex_session_id);
-        $aiContent = $aiResponse['content'];
-        $citations = $aiResponse['citations'];
-
-        // 4. Save AI Response
-        $aiMessage = $conversation->messages()->create([
-            'role' => 'assistant',
-            'content' => $aiContent,
-            'metadata' => !empty($citations) ? ['citations' => $citations] : null,
-        ]);
-
-        return response()->json([
-            'user_message' => $userMessage,
-            'ai_message' => $aiMessage,
-            'citations' => $citations,
-        ]);
     }
 }

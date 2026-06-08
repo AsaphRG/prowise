@@ -176,7 +176,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
 
-            if (!response.ok) throw new Error("{{ __('Falha ao enviar mensagem') }}");
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || "{{ __('Falha ao enviar mensagem') }}");
+            }
 
             const data = await response.json();
             
@@ -188,7 +191,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } catch (error) {
             console.error('Error:', error);
             typingIndicator.classList.add('hidden');
-            alert("{{ __('Erro ao processar mensagem. Tente novamente.') }}");
+            alert("{{ __('Erro ao processar mensagem:') }} " + error.message);
         }
     });
 
@@ -205,9 +208,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 <div class="mt-3 pt-3 border-t border-prowise-gray/10 text-[10px]">
                     <p class="font-semibold text-prowise-softblue mb-1 uppercase tracking-wider">{{ __('Fontes:') }}</p>
                     <ul class="space-y-1">
-                        ${citations.map(c => `
-                            <li><a href="${c.url || '#'}" target="_blank" class="text-prowise-blue hover:underline opacity-80">${c.title || c.source || 'Referência'}</a></li>
-                        `).join('')}
+                        ${citations.map(c => {
+                            const url = typeof c === 'string' ? '#' : (c.url || '#');
+                            const title = typeof c === 'string' ? c : (c.title || c.source || 'Referência');
+                            return `<li><a href="${url}" target="_blank" class="text-prowise-blue hover:underline opacity-80">${title}</a></li>`;
+                        }).join('')}
                     </ul>
                 </div>
             `;

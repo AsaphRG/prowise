@@ -25,11 +25,11 @@ class VertexAIService
             'location' => $this->location,
             'resource' => $this->resourceId
         ]);
-        $creds = Config::get('services.vertex_ai.credentials');
-        if (str_starts_with($creds, '.\\') || str_starts_with($creds, './')) {
-            $this->credentialsPath = base_path(str_replace(['.\\', './'], '', $creds));
+        $creds = Config::get(\'services.vertex_ai.credentials\');
+        if ($creds && (str_starts_with($creds, \'.\\\\\') || str_starts_with($creds, \'./\'))) {
+            $this->credentialsPath = base_path(str_replace([\'.\\\\\', \'./\'], \'\', $creds));
         } else {
-            $this->credentialsPath = $creds;
+            $this->credentialsPath = $creds ?? \'\';
         }
     }
 
@@ -94,50 +94,52 @@ class VertexAIService
 
     /**
      * Query the Reasoning Engine (RAG Agent) via AdkApp stream_query.
-     *
-     * AdkApp :stream_query returns a stream of ADK events (JSON lines). Each
-     * event has shape: { content: { parts: [...] }, author, ... }. We
-     * accumulate text parts and citations from rag_query function_response
-     * events into a single response for the UI.
      */
     public function query(string $query, ?string $sessionId = null, array $history = [])
     {
         try {
             $token = $this->getAccessToken();
-            $endpoint = $this->baseEndpoint() . ':streamQuery?alt=sse';
+            $endpoint = $this->baseEndpoint() . \':streamQuery?alt=sse\';
+
+            // Use consistent user ID for session tracking
+            $userId = \Illuminate\Support\Facades\Auth::check() ? (string) \Illuminate\Support\Facades\Auth::id() : \'guest_user\';
 
             $payload = [
-                'class_method' => 'stream_query',
-                'input' => [
-                    'message' => $query,
-                    'user_id' => 'laravel_user_' . uniqid(), // Use unique user to avoid session conflicts
-                    // 'session_id' => $sessionId ?? 'laravel_session', // Temporarily commented out
+                \'class_method\' => \'stream_query\',
+                \'input\' => [
+                    \'message\' => $query,
+                    \'user_id\' => $userId,
+                    \'session_id\' => $sessionId ?? \'laravel_default_session\',
                 ],
             ];
+
+            Log::debug(\'Vertex AI Stream Query Start\', [
+                \'session_id\' => $sessionId,
+                \'user_id\' => $userId
+            ]);
 
             // Use stream => true to handle SSE properly
             $response = Http::withToken($token)
                 ->withHeaders([
-                    'Content-Type' => 'application/json',
-                    'Accept' => 'text/event-stream',
+                    \'Content-Type\' => \'application/json\',
+                    \'Accept\' => \'text/event-stream\',
                 ])
                 ->timeout(120)
-                ->withOptions(['stream' => true])
+                ->withOptions([\'stream\' => true])
                 ->post($endpoint, $payload);
 
             if ($response->failed()) {
-                Log::error('Vertex AI Stream Query Failed', [
-                    'status' => $response->status(),
-                    'headers' => $response->headers(),
-                    'body' => $response->body(),
+                Log::error(\'Vertex AI Stream Query Failed\', [
+                    \'status\' => $response->status(),
+                    \'body\' => $response->body(),
                 ]);
                 return [
-                    'content' => 'Desculpe, tive um problema ao processar sua solicitação.',
-                    'citations' => [],
+                    \'content\' => \'Desculpe, tive um problema ao processar sua solicitação.\',
+                    \'citations\' => [],
                 ];
             }
 
-            $content = '';
+            $content = \'\';
             $citations = [];
             $stream = $response->toPsrResponse()->getBody();
 
@@ -146,32 +148,54 @@ class VertexAIService
                 $line = $this->readLine($stream);
                 if (empty($line)) continue;
 
-                Log::debug('Vertex AI Stream Line', ['line' => substr($line, 0, 100)]);
-
                 $jsonData = $line;
                 // Remove SSE prefix if present
-                if (str_starts_with($line, 'data:')) {
+                if (str_starts_with($line, \'data:\')) {
                     $jsonData = trim(substr($line, 5));
                 }
 
-                if ($jsonData === '[DONE]') break;
+                if ($jsonData === \'[DONE]\') break;
 
                 $event = json_decode($jsonData, true);
-                if ($event && isset($event['content']['parts'])) {
-                    foreach ($event['content']['parts'] as $part) {
-                        if (!empty($part['text'])) {
-                            $content .= $part['text'];
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    Log::warning(\'Vertex AI Stream JSON Decode Error\', [
+                        \'error\' => json_last_error_msg(),
+                        \'line\' => substr($jsonData, 0, 100)
+                    ]);
+                    continue;
+                }
+
+                if (isset($event[\'content\'][\'parts\'])) {
+                    foreach ($event[\'content\'][\'parts\'] as $part) {
+                        if (!empty($part[\'text\'])) {
+                            $content .= $part[\'text\'];
                         }
                         
-                        // Capture citations
-                        $funcResp = $part['function_response'] ?? null;
-                        if ($funcResp && ($funcResp['name'] ?? null) === 'rag_query') {
-                            $data = $funcResp['response'] ?? [];
-                            if (($data['status'] ?? null) === 'success') {
-                                foreach ($data['results'] ?? [] as $res) {
-                                    $source = $res['source_name'] ?? $res['source_uri'] ?? null;
-                                    if ($source && !in_array($source, $citations, true)) {
-                                        $citations[] = $source;
+                        // Capture citations from rag_query function_response
+                        $funcResp = $part[\'function_response\'] ?? null;
+                        if ($funcResp && ($funcResp[\'name\'] ?? null) === \'rag_query\') {
+                            $data = $funcResp[\'response\'] ?? [];
+                            if (($data[\'status\'] ?? null) === \'success\') {
+                                foreach ($data[\'results\'] ?? [] as $res) {
+                                    $source = $res[\'source_name\'] ?? $res[\'source_uri\'] ?? null;
+                                    if ($source) {
+                                        $citation = [
+                                            \'source\' => $source,
+                                            \'url\' => $res[\'source_uri\'] ?? \'#\',
+                                            \'title\' => $res[\'source_name\'] ?? \'Referência\'
+                                        ];
+
+                                        // Deduplicate
+                                        $exists = false;
+                                        foreach ($citations as $c) {
+                                            if ($c[\'source\'] === $source) {
+                                                $exists = true;
+                                                break;
+                                            }
+                                        }
+                                        if (!$exists) {
+                                            $citations[] = $citation;
+                                        }
                                     }
                                 }
                             }
@@ -180,42 +204,45 @@ class VertexAIService
                 }
             }
 
-            if (trim($content) === '') {
-                Log::warning('Vertex AI: Stream ended with no content', [
-                    'headers' => $response->headers(),
-                    'status' => $response->status()
+            if (trim($content) === \'\') {
+                Log::warning(\'Vertex AI: Stream ended with no content\', [
+                    \'status\' => $response->status()
                 ]);
                 return [
-                    'content' => 'O assistente não retornou uma resposta textual. Verifique se o seu projeto Google Cloud tem as permissões necessárias e se o faturamento está ativo.',
-                    'citations' => $citations,
+                    \'content\' => \'O assistente não retornou uma resposta textual. Verifique se o seu projeto Google Cloud tem as permissões necessárias.\',
+                    \'citations\' => $citations,
                 ];
             }
 
             return [
-                'content' => $content,
-                'citations' => $citations,
+                \'content\' => $content,
+                \'citations\' => $citations,
             ];
 
         } catch (\Exception $e) {
-            Log::error('Vertex AIService Error: ' . $e->getMessage());
+            Log::error(\'Vertex AIService Error: \' . $e->getMessage(), [
+                \'trace\' => substr($e->getTraceAsString(), 0, 500)
+            ]);
             return [
-                'content' => 'Erro interno ao processar a resposta do assistente.',
-                'citations' => [],
+                \'content\' => \'Erro interno ao processar a resposta do assistente.\',
+                \'citations\' => [],
             ];
         }
     }
 
     /**
-     * Helper to read a line from a PSR-7 stream
+     * Helper to read a line from a PSR-7 stream.
+     * Handles SSE lines which might end with \r\n or just \n.
      */
     protected function readLine($stream): string
     {
-        $buffer = '';
+        $buffer = \'\';
         while (!$stream->eof()) {
             $char = $stream->read(1);
-            if ($char === "\n") break;
+            if ($char === \'\') break;
+            if ($char === \"\\n\") break;
             $buffer .= $char;
         }
-        return trim($buffer);
+        return trim($buffer, \"\\r\\n \");
     }
 }
