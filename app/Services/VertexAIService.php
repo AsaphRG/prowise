@@ -26,10 +26,17 @@ class VertexAIService
             'resource' => $this->resourceId
         ]);
         $creds = Config::get('services.vertex_ai.credentials');
-        if ($creds && (str_starts_with($creds, '.\\') || str_starts_with($creds, './'))) {
-            $this->credentialsPath = base_path(str_replace(['.\\', './'], '', $creds));
+        if ($creds) {
+            // Check if it's already an absolute path (Linux '/' or Windows 'C:\')
+            if (str_starts_with($creds, '/') || preg_match('/^[A-Za-z]:\\\\/', $creds)) {
+                $this->credentialsPath = $creds;
+            } else {
+                // Clean up any leading './' or '.\' before using base_path
+                $cleanCreds = preg_replace('/^\\.\\/|^\\.\\\\/', '', $creds);
+                $this->credentialsPath = base_path($cleanCreds);
+            }
         } else {
-            $this->credentialsPath = $creds ?? '';
+            $this->credentialsPath = '';
         }
     }
 
