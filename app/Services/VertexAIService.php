@@ -33,6 +33,8 @@ class VertexAIService
             } else {
                 // Clean up any leading './' or '.\' before using base_path
                 $cleanCreds = preg_replace('/^\\.\\/|^\\.\\\\/', '', $creds);
+                // Normalize any remaining backslashes to forward slashes for Linux compatibility
+                $cleanCreds = str_replace('\\', '/', $cleanCreds);
                 $this->credentialsPath = base_path($cleanCreds);
             }
         } else {
