@@ -21,16 +21,75 @@ class ChatController extends Controller
     /**
      * Display the chat interface.
      */
-    public function index()
+    public function index($conversationId = null)
     {
-        // For now, we'll just handle one main conversation per user for simplicity
-        $conversation = Auth::user()->conversations()->firstOrCreate([
-            'title' => 'Conversa Principal',
-        ]);
+        $user = Auth::user();
+        $conversations = $user->conversations()->orderBy('updated_at', 'desc')->get();
+
+        if ($conversationId) {
+            $conversation = $user->conversations()->findOrFail($conversationId);
+        } else {
+            $conversation = $conversations->first();
+            if (!$conversation) {
+                $conversation = $user->conversations()->create([
+                    'title' => __('Nova Conversa'),
+                ]);
+                $conversations = $user->conversations()->orderBy('updated_at', 'desc')->get();
+            }
+        }
 
         $messages = $conversation->messages()->orderBy('created_at', 'asc')->get();
 
-        return view('chat', compact('messages', 'conversation'));
+        return view('chat', compact('conversations', 'conversation', 'messages'));
+    }
+
+    /**
+     * Create a new conversation session.
+     */
+    public function create()
+    {
+        $conversation = Auth::user()->conversations()->create([
+            'title' => __('Nova Conversa'),
+        ]);
+
+        return redirect()->route('chat', $conversation->id);
+    }
+
+    /**
+     * Rename a conversation session.
+     */
+    public function rename(Request $request, Conversation $conversation)
+    {
+        if ($conversation->user_id !== Auth::id()) {
+            return response()->json(['error' => __('Não autorizado')], 403);
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+        ]);
+
+        $conversation->update([
+            'title' => $request->title,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'title' => $conversation->title,
+        ]);
+    }
+
+    /**
+     * Delete a conversation session.
+     */
+    public function destroy(Conversation $conversation)
+    {
+        if ($conversation->user_id !== Auth::id()) {
+            return back()->with('error', __('Não autorizado'));
+        }
+
+        $conversation->delete();
+
+        return redirect()->route('chat');
     }
 
     /**
@@ -57,11 +116,27 @@ class ChatController extends Controller
                 'content' => $request->message,
             ]);
 
+            // Auto-rename conversation if this is the first message and it has the default title
+            $isFirstMessage = $conversation->messages()->count() === 1;
+            $isDefaultTitle = in_array($conversation->title, ['Nova Conversa', __('Nova Conversa'), 'New Conversation']);
+
+            if ($isFirstMessage && $isDefaultTitle) {
+                $rawTitle = strip_tags($request->message);
+                $rawTitle = preg_replace('/\s+/', ' ', $rawTitle);
+                $rawTitle = trim($rawTitle);
+                
+                if (preg_match('/^([^.!?\n]{5,40})[.!?\n]/u', $rawTitle, $matches)) {
+                    $conversation->title = trim($matches[1]);
+                } else {
+                    $conversation->title = \Illuminate\Support\Str::limit($rawTitle, 35, '...');
+                }
+            }
+
             // 2. Ensure the ADK session exists
             if (!$conversation->vertex_session_id) {
                 $conversation->vertex_session_id = $this->vertexAI->createSession(Auth::id());
-                $conversation->save();
             }
+            $conversation->touch();
 
             // 3. Query Vertex AI Reasoning Engine
             $aiResponse = $this->vertexAI->query($request->message, $conversation->vertex_session_id);
@@ -79,6 +154,7 @@ class ChatController extends Controller
                 'user_message' => $userMessage,
                 'ai_message' => $aiMessage,
                 'citations' => $citations,
+                'conversation_title' => $conversation->title,
             ]);
 
         } catch (\Exception $e) {

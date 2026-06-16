@@ -14,7 +14,10 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/chat', [\App\Http\Controllers\ChatController::class, 'index'])->name('chat');
+    Route::get('/chat/{conversation?}', [\App\Http\Controllers\ChatController::class, 'index'])->name('chat');
+    Route::post('/chat/new', [\App\Http\Controllers\ChatController::class, 'create'])->name('chat.new');
+    Route::put('/chat/{conversation}/rename', [\App\Http\Controllers\ChatController::class, 'rename'])->name('chat.rename');
+    Route::delete('/chat/{conversation}', [\App\Http\Controllers\ChatController::class, 'destroy'])->name('chat.destroy');
     Route::post('/chat/send', [\App\Http\Controllers\ChatController::class, 'store'])->name('chat.send');
     
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
