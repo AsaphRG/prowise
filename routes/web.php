@@ -8,6 +8,7 @@ Route::get('/', function () {
 });
 
 Route::view('/agendar-demonstracao', 'agendar-demonstracao')->name('agendar-demonstracao');
+Route::view('/sobre', 'sobre')->name('sobre');
 
 Route::get('/dashboard', function () {
     return redirect()->route('chat');

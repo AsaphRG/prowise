@@ -67,7 +67,7 @@
                         <h4 class="text-white font-heading font-bold text-sm uppercase tracking-widest mb-6">{{ __('Plataforma') }}</h4>
                         <ul class="space-y-4">
                             <li><a href="{{ route('chat') }}" class="text-prowise-softblue hover:text-prowise-blue text-sm transition-colors">{{ __('Chat IA') }}</a></li>
-                            <li><a href="#solucao" class="text-prowise-softblue hover:text-prowise-blue text-sm transition-colors">{{ __('Como Funciona') }}</a></li>
+                            <li><a href="#fluxo" class="text-prowise-softblue hover:text-prowise-blue text-sm transition-colors">{{ __('Como Funciona') }}</a></li>
                         </ul>
                     </div>
 
@@ -76,7 +76,7 @@
                         <h4 class="text-white font-heading font-bold text-sm uppercase tracking-widest mb-6">{{ __('Empresa') }}</h4>
                         <ul class="space-y-4">
                             <li><a href="{{ route('agendar-demonstracao') }}" class="text-prowise-softblue hover:text-prowise-blue text-sm transition-colors">{{ __('Agendar Demonstração') }}</a></li>
-                            <li><a href="#" class="text-prowise-softblue hover:text-prowise-blue text-sm transition-colors">{{ __('Sobre Nós') }}</a></li>
+                            <li><a href="{{ route('sobre') }}" class="text-prowise-softblue hover:text-prowise-blue text-sm transition-colors">{{ __('Sobre Nós') }}</a></li>
                             <li><a href="#" class="text-prowise-softblue hover:text-prowise-blue text-sm transition-colors">{{ __('Blog') }}</a></li>
                         </ul>
                     </div>
